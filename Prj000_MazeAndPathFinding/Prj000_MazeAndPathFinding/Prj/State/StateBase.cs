@@ -18,6 +18,7 @@ namespace Prj000_MazeAndPathFinding.Prj.State
                     break;
 
                 case Process.Process.ProcessState.PathFinding:
+                    stateObj = new PathFinding(process);
                     break;
 
                 case Process.Process.ProcessState.Run:

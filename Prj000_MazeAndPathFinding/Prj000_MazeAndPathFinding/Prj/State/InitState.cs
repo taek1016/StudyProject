@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Prj000_MazeAndPathFinding.Prj.State
 {
@@ -45,7 +41,16 @@ namespace Prj000_MazeAndPathFinding.Prj.State
         {
             if (Console.KeyAvailable)
             {
-                m_Input = int.Parse(((char)Console.ReadKey(true).Key).ToString());
+                var readKey = Console.ReadKey(true);
+
+                int input = -1;
+
+                if (!int.TryParse(readKey.KeyChar.ToString(), out input))
+                {
+                    return;
+                }
+
+                m_Input = input - 1;
 
                 if (0 <= m_Input && m_Input < m_MapGeneratorType.Length)
                 {
@@ -73,7 +78,7 @@ namespace Prj000_MazeAndPathFinding.Prj.State
 
             if (m_Input != -1)
             {
-                Console.Write($"{m_MapGeneratorType[m_Input - 1]}");
+                Console.Write($"{m_MapGeneratorType[m_Input]}");
             }
         }
     }

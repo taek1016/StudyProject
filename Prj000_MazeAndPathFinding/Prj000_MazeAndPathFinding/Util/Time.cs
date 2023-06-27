@@ -9,8 +9,6 @@ namespace Prj000_MazeAndPathFinding.Util
 {
     public class Time
     {
-        int m_FramePerMinute = 0;
-
         Stopwatch m_StopWatch = new Stopwatch();
         Stopwatch m_TotalTime = new Stopwatch();
         public double DeltaTime

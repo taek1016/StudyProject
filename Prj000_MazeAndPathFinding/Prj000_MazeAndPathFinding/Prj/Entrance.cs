@@ -22,7 +22,18 @@ namespace Prj000_MazeAndPathFinding.Prj
         {
             Console.Write("Press any key to start : ");
 
-            int input = Console.In.Peek();
+            while (true)
+            {
+                if (Console.KeyAvailable)
+                {
+                    var readKey = Console.ReadKey(true);
+
+                    if (readKey.Key != 0)
+                    {
+                        break;
+                    }
+                }
+            }
 
             Console.Clear();
 

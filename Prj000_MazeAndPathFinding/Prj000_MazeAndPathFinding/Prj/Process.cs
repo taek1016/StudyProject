@@ -31,6 +31,10 @@ namespace Prj000_MazeAndPathFinding.Prj.Process
         double m_ChangeTime = 3.0;
         bool m_bStateChangeCalled = false;
 
+        Util.MapData m_MapData = new Util.MapData();
+
+        public Util.MapData MapData { get => m_MapData; }
+
         public Process()
         {
             Console.CursorVisible = false;
@@ -65,6 +69,7 @@ namespace Prj000_MazeAndPathFinding.Prj.Process
 
             if (m_bStateChangeCalled && m_AccTime > m_ChangeTime && m_NextStateObj != null && m_NextStateObj != m_StateObj)
             {
+                Console.Clear();
                 m_StateObj = m_NextStateObj;
                 m_AccTime = 0;
             }
