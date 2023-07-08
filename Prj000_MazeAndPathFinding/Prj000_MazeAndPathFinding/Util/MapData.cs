@@ -17,11 +17,35 @@ namespace Prj000_MazeAndPathFinding.Prj.Util
             MapCharacter = mapCharacter;
             MapColor = color;
         }
+
+        public SingleMapInfo Clone()
+        {
+            SingleMapInfo mapInfo = new SingleMapInfo(MapStr, MapCharacter, MapColor);
+
+            Debug.Assert(mapInfo != null, "SingleMapInfo Clone is null!");
+
+            return mapInfo;
+        }
     }
 
     #region MapInfo
     internal class MapInfo
     {
+        internal MapInfo()
+        {
+            m_MapInfo = new Dictionary<string, SingleMapInfo>();
+        }
+
+        internal MapInfo(MapInfo other)
+        {
+            m_MapInfo = new Dictionary<string, SingleMapInfo>();
+
+            foreach (var item in other.m_MapInfo)
+            {
+                m_MapInfo.Add(item.Key, item.Value.Clone());
+            }
+        }
+
         public void Init()
         {
             m_MapInfo.Clear();
@@ -65,13 +89,39 @@ namespace Prj000_MazeAndPathFinding.Prj.Util
             }
         }
 
-        Dictionary<string, SingleMapInfo> m_MapInfo = new Dictionary<string, SingleMapInfo>();
+        Dictionary<string, SingleMapInfo> m_MapInfo = null;
     }
     #endregion
 
     public class MapData
     {
-        private MapInfo m_Info = new MapInfo();
+        public MapData()
+        {
+            m_Info = new MapInfo();
+        }
+
+        // PathFinding하면서 Map 정보 추가하기 위해서 필요해짐
+        public MapData(MapData other)
+        {
+            m_Info = new MapInfo(other.m_Info);
+
+            CreateMap(m_WidthSize, m_HeightSize);
+
+            for (int i = 0; i < m_WidthSize; ++i)
+            {
+                for (int j = 0; j < m_HeightSize; ++j)
+                {
+                    m_MapData[i, j] = other.m_MapData[i, j];
+                    m_Color[i, j] = other.m_Color[i, j];
+                    m_Visited[i, j] = other.m_Visited[i, j];
+                }
+            }
+
+            m_StartPoint = other.m_StartPoint.Copy();
+            m_EndPoint = other.m_EndPoint.Copy();
+        }
+
+        private MapInfo m_Info = null;
 
         int m_WidthSize = -1;
         public int WidthSize { get => m_WidthSize; }

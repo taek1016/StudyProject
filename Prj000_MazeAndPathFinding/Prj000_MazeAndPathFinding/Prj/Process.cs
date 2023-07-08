@@ -25,21 +25,25 @@ namespace Prj000_MazeAndPathFinding.Prj.Process
         State.StateBase m_NextStateObj = null;
         #endregion
 
-        public string MapAlgorithmName { get; private set; }
-
         double m_AccTime = 0;
         double m_ChangeTime = 3.0;
         bool m_bStateChangeCalled = false;
 
+        #region CoreData
         Util.MapData m_MapData = new Util.MapData();
 
         public Util.MapData MapData { get => m_MapData; }
 
+        public Util.PathData PathData { get; set; }
+        #endregion
+
+        ProcessState m_CurrentState = ProcessState.Init;
+        ProcessState m_NextState = ProcessState.MapGenerating;
         public Process()
         {
             Console.CursorVisible = false;
 
-            SetStateObj(ProcessState.Init, this);
+            SetStateObj(m_CurrentState);
 
             m_AccTime = m_ChangeTime + 1;
         }
@@ -49,15 +53,14 @@ namespace Prj000_MazeAndPathFinding.Prj.Process
             Console.CursorVisible = true;
         }
 
-        public void SetStateObj(ProcessState state, Process obj)
+        public void SetStateObj(ProcessState state)
         {
-            m_NextStateObj = State.StateBase.Create(state, obj);
-            m_bStateChangeCalled = true;
-        }
+            Console.Clear();
 
-        public void SetMapGenerator(string generatorName)
-        {
-            MapAlgorithmName = generatorName;
+            m_NextState = state;
+
+            m_NextStateObj = State.StateBase.Create(m_NextState, this);
+            m_bStateChangeCalled = true;
         }
 
         public void Run(double deltaTime)
@@ -69,6 +72,7 @@ namespace Prj000_MazeAndPathFinding.Prj.Process
 
             if (m_bStateChangeCalled && m_AccTime > m_ChangeTime && m_NextStateObj != null && m_NextStateObj != m_StateObj)
             {
+                m_bStateChangeCalled = false;
                 Console.Clear();
                 m_StateObj = m_NextStateObj;
                 m_AccTime = 0;
@@ -77,7 +81,26 @@ namespace Prj000_MazeAndPathFinding.Prj.Process
             Debug.Assert(m_StateObj != null, "State Object is null!");
 
             m_StateObj?.Update(deltaTime);
-            m_StateObj?.Render();
+            if (!m_bStateChangeCalled)
+            {
+                m_StateObj?.Render();
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+
+                Console.SetCursorPosition(0, 0);
+
+                Console.Write($"{m_CurrentState} -> {m_NextState}");
+
+                double accTime = m_AccTime;
+
+                while (accTime > 0)
+                {
+                    Console.Write(".");
+                    accTime -= 0.3;
+                }
+            }
         }
     }
 }

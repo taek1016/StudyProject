@@ -45,6 +45,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Prj\Entrance.cs" />
+    <Compile Include="Prj\PathFinding\BFS.cs" />
+    <Compile Include="Prj\PathFinding\PathFindingBase.cs" />
     <Compile Include="Prj\State\PathFinding.cs" />
     <Compile Include="Util\MapData.cs" />
     <Compile Include="Prj\MapGenerator\MapGeneratorBase.cs" />
@@ -55,6 +57,7 @@
     <Compile Include="Prj\State\StateBase.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Util\PathData.cs" />
     <Compile Include="Util\Point.cs" />
     <Compile Include="Util\Time.cs" />
   </ItemGroup>

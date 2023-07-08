@@ -6,23 +6,51 @@ namespace Prj000_MazeAndPathFinding.Prj.State
 {
     public class MapGenerating : StateBase
     {
+        string[] m_MapGeneratorType = null;
+
+        public enum MapGeneratorType
+        {
+            Recursive_Back_Tracking,
+            Binary_Tree,
+            SideWinder,
+            Recursive_Division,
+            Eller,
+            Wilson,
+            Hunt_and_Kill,
+            Growing_Tree,
+            Aldous_Broder,
+            Prim,
+            Kruskal,
+            End
+        }
+        MapGeneratorType m_SelectMapType = MapGeneratorType.End;
+
         MapGenerator.MapGeneratorBase m_MapGenerator = null;
 
         public enum GeneratingMapState
         {
+            SelectMapType,
             SelectMapXSize,
             SelectMapYSize,
             GeneratingMap,
             WaitEnd
         }
 
-        public GeneratingMapState MapGenerateState { get; set; } = GeneratingMapState.SelectMapXSize;
-        
+        public GeneratingMapState MapGenerateState { get; set; } = GeneratingMapState.SelectMapType;
+
         Point m_MapSize = new Point();
 
         public MapGenerating(Process.Process process)
             : base(process)
         {
+            m_MapGeneratorType = Enum.GetNames(typeof(MapGeneratorType));
+
+            int mapGeneratorCount = m_MapGeneratorType.Length - 1;
+
+            for (int i = 0; i < mapGeneratorCount; ++i)
+            {
+                m_MapGeneratorType[i] = m_MapGeneratorType[i].Replace('_', ' ');
+            }
         }
 
         string m_Input;
@@ -30,13 +58,40 @@ namespace Prj000_MazeAndPathFinding.Prj.State
         double m_CurrentDeltaTime = 0;
         double m_MapGenerateSpeed = 0.3;
 
-        const int UPPER_WIDTH_LIMIT = 349 / 4;
-        const int UPPER_HEIGHT_LIMIT = 101 - 20;
+        const int UPPER_WIDTH_LIMIT = 349 / 4;      // Console
+        const int UPPER_HEIGHT_LIMIT = 101 - 20;    // 
 
+        bool m_bStateChanged = false;
         public override void Update(double deltaTime)
         {
             switch (MapGenerateState)
             {
+                case GeneratingMapState.SelectMapType:
+                    {
+                        if (Console.KeyAvailable)
+                        {
+                            var readKey = Console.ReadKey(true);
+
+                            int input;
+
+                            if (!int.TryParse(readKey.KeyChar.ToString(), out input))
+                            {
+                                return;
+                            }
+
+                            if (0 > input || input >= (int)MapGeneratorType.End)
+                            {
+                                return;
+                            }
+
+                            m_SelectMapType = (MapGeneratorType)(input - 1);
+
+                            MapGenerateState = GeneratingMapState.SelectMapXSize;
+                            Console.Clear();
+                        }
+                    }
+                    break;
+
                 case GeneratingMapState.SelectMapXSize:
                     {
                         if (Console.KeyAvailable)
@@ -65,7 +120,6 @@ namespace Prj000_MazeAndPathFinding.Prj.State
                                 break;
                             }
 
-                            
                             if (0 > input || input % 2 == 0 || input >= UPPER_WIDTH_LIMIT) // 349는 SetWindowSize에서 제한하는 크기
                             {
                                 Console.Clear();
@@ -153,8 +207,8 @@ namespace Prj000_MazeAndPathFinding.Prj.State
 
                         if (m_CurrentDeltaTime >= m_MapGenerateSpeed)
                         {
-                            m_CurrentDeltaTime = 0;
-                            m_MapGenerator.GenerateMap(deltaTime); 
+                            m_CurrentDeltaTime -= m_MapGenerateSpeed;
+                            m_MapGenerator.GenerateMap(deltaTime);
                         }
 
                         if (m_MapGenerator.bGenerateEnded)
@@ -165,7 +219,12 @@ namespace Prj000_MazeAndPathFinding.Prj.State
                     break;
 
                 case GeneratingMapState.WaitEnd:
-                    m_Process.SetStateObj(Process.Process.ProcessState.PathFinding, m_Process);
+                    if (!m_bStateChanged)
+                    {
+                        m_bStateChanged = true;
+
+                        m_Process.SetStateObj(Process.Process.ProcessState.PathFinding); 
+                    }
                     break;
             }
         }
@@ -176,11 +235,32 @@ namespace Prj000_MazeAndPathFinding.Prj.State
 
             switch (MapGenerateState)
             {
+                case GeneratingMapState.SelectMapType:
+                    Debug.Assert(m_MapGeneratorType != null, "Map Type is null!");
+
+                    int mapGeneratorCount = m_MapGeneratorType.Length - 1;
+                    for (int i = 0; i < mapGeneratorCount; ++i)
+                    {
+                        Console.WriteLine($"{i + 1}.\t{m_MapGeneratorType[i]}");
+                    }
+
+                    Console.WriteLine();
+
+                    Console.Write("Select\t: ");
+
+                    if (m_SelectMapType != MapGeneratorType.End)
+                    {
+                        Console.Write($"{m_MapGeneratorType[(int)m_SelectMapType]}");
+                    }
+                    break;
+
                 case GeneratingMapState.SelectMapXSize:
+                    Console.WriteLine($"Map Type : {m_SelectMapType}");
                     Console.Write($"Map Width Size (Odd Number, Upper Limit {UPPER_WIDTH_LIMIT}) : {m_Input}");
                     break;
 
                 case GeneratingMapState.SelectMapYSize:
+                    Console.WriteLine($"Map Type : {m_SelectMapType}");
                     Console.WriteLine($"Map Width Size (Odd Number, Upper Limit {UPPER_WIDTH_LIMIT}) : {m_MapSize.X}");
                     Console.Write($"Map Width Height (Odd Number, Upper Limit {UPPER_HEIGHT_LIMIT}) : {m_Input}");
                     break;
@@ -203,12 +283,12 @@ namespace Prj000_MazeAndPathFinding.Prj.State
 
                     break;
             }
-            
+
         }
 
         void CreateMapGenerator()
         {
-            m_MapGenerator = MapGenerator.MapGeneratorBase.Create(m_Process, m_MapSize.X, m_MapSize.Y);
+            m_MapGenerator = MapGenerator.MapGeneratorBase.Create(m_Process, (MapGeneratorType)m_SelectMapType, m_MapSize.X, m_MapSize.Y);
             Debug.Assert(m_MapGenerator != null, "Map Generator is not created!");
         }
 
@@ -218,6 +298,7 @@ namespace Prj000_MazeAndPathFinding.Prj.State
 
             Debug.Assert(m_MapGenerator != null, "Map Type is null!");
 
+            Console.WriteLine($"Map Type : {m_SelectMapType}");
             Console.WriteLine($"Map Width Size (Odd Number, Upper Limit {UPPER_WIDTH_LIMIT}) : {m_MapSize.X}");
             Console.WriteLine($"Map Width Height (Odd Number, Upper Limit {UPPER_HEIGHT_LIMIT}) : {m_MapSize.Y}");
             Console.WriteLine();

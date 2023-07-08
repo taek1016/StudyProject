@@ -2,27 +2,57 @@
 using Prj000_MazeAndPathFinding.Util;
 using System;
 using System.Diagnostics;
+using static Prj000_MazeAndPathFinding.Prj.State.MapGenerating;
 
 namespace Prj000_MazeAndPathFinding.Prj.MapGenerator
 {
     public abstract class MapGeneratorBase
     {
         #region Create
-        public static MapGeneratorBase Create(Process.Process process, int widthSize, int heightSize)
+        public static MapGeneratorBase Create(Process.Process process, MapGeneratorType mapGenerateType, int widthSize, int heightSize)
         {
             MapGeneratorBase mapAlgorithm = null;
 
-            string mapAlgorithmName = process.MapAlgorithmName;
             var mapData = process.MapData;
 
-            switch (mapAlgorithmName)
+            switch (mapGenerateType)
             {
-                case "Recursive_Back_Tracking":
+                case MapGeneratorType.Recursive_Back_Tracking:
                     mapAlgorithm = new RecursiveBackTracking(mapData);
                     break;
 
+                case MapGeneratorType.Binary_Tree:
+                    break;
+
+                case MapGeneratorType.SideWinder:
+                    break;
+
+                case MapGeneratorType.Recursive_Division:
+                    break;
+
+                case MapGeneratorType.Eller:
+                    break;
+
+                case MapGeneratorType.Wilson:
+                    break;
+
+                case MapGeneratorType.Hunt_and_Kill:
+                    break;
+
+                case MapGeneratorType.Growing_Tree:
+                    break;
+
+                case MapGeneratorType.Aldous_Broder:
+                    break;
+
+                case MapGeneratorType.Prim:
+                    break;
+
+                case MapGeneratorType.Kruskal:
+                    break;
+
                 default:
-                    Debug.Assert(false, $"{mapAlgorithmName} is not exist!");
+                    Debug.Assert(false, $"{mapGenerateType} is not exist!");
                     break;
             }
 
@@ -34,7 +64,7 @@ namespace Prj000_MazeAndPathFinding.Prj.MapGenerator
         }
         #endregion
 
-        protected Util.MapData m_MapData = null;
+        protected MapData m_MapData = null;
 
         public char[,] MapData { get => m_MapData.Map; }
         public bool[,] Visited { get => m_MapData.Visited; }
