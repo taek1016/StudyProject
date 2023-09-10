@@ -37,7 +37,7 @@ namespace Prj000_MazeAndPathFinding.Prj.State
         }
 
         public GeneratingMapState MapGenerateState { get; set; } = GeneratingMapState.SelectMapType;
-
+        GeneratingMapState m_NextMapState;
         Point m_MapSize = new Point();
 
         public MapGenerating(Process.Process process)
@@ -61,9 +61,26 @@ namespace Prj000_MazeAndPathFinding.Prj.State
         const int UPPER_WIDTH_LIMIT = 349 / 4;      // Console
         const int UPPER_HEIGHT_LIMIT = 101 - 20;    // 
 
+        double m_CurrentMapChangeTime = 0;
         bool m_bStateChanged = false;
         public override void Update(double deltaTime)
         {
+            if (m_bStateChanged)
+            {
+                m_CurrentMapChangeTime += deltaTime;
+            }
+
+            if (m_bStateChanged && m_CurrentMapChangeTime >= 1.0)
+            {
+                m_CurrentMapChangeTime = 0;
+
+                m_bStateChanged = false;
+
+                m_Process.RequestClearMap();
+
+                MapGenerateState = m_NextMapState;
+            }
+
             switch (MapGenerateState)
             {
                 case GeneratingMapState.SelectMapType:
@@ -86,8 +103,9 @@ namespace Prj000_MazeAndPathFinding.Prj.State
 
                             m_SelectMapType = (MapGeneratorType)(input - 1);
 
-                            MapGenerateState = GeneratingMapState.SelectMapXSize;
-                            Console.Clear();
+                            m_NextMapState = GeneratingMapState.SelectMapXSize;
+
+                            m_bStateChanged = true;
                         }
                     }
                     break;
@@ -106,7 +124,6 @@ namespace Prj000_MazeAndPathFinding.Prj.State
                             if (temp.Key == ConsoleKey.Backspace && m_Input.Length > 0)
                             {
                                 m_Input = m_Input.Substring(0, m_Input.Length - 1);
-                                Console.Clear();
                                 break;
                             }
                             else if (temp.Key != ConsoleKey.Enter)
@@ -122,14 +139,16 @@ namespace Prj000_MazeAndPathFinding.Prj.State
 
                             if (0 > input || input % 2 == 0 || input >= UPPER_WIDTH_LIMIT) // 349는 SetWindowSize에서 제한하는 크기
                             {
-                                Console.Clear();
                                 m_Input = "";
                                 break;
                             }
 
                             m_MapSize.X = input;
 
-                            MapGenerateState = GeneratingMapState.SelectMapYSize;
+                            m_NextMapState = GeneratingMapState.SelectMapYSize;
+
+                            m_bStateChanged = true;
+
                             m_Input = "";
                         }
                     }
@@ -149,7 +168,6 @@ namespace Prj000_MazeAndPathFinding.Prj.State
                             if (temp.Key == ConsoleKey.Backspace && m_Input.Length > 0)
                             {
                                 m_Input = m_Input.Substring(0, m_Input.Length - 1);
-                                Console.Clear();
                                 break;
                             }
                             else if (temp.Key != ConsoleKey.Enter)
@@ -165,7 +183,6 @@ namespace Prj000_MazeAndPathFinding.Prj.State
 
                             if (0 > input || input % 2 == 0 || input >= UPPER_HEIGHT_LIMIT)
                             {
-                                Console.Clear();
                                 m_Input = "";
                                 break;
                             }
@@ -174,9 +191,10 @@ namespace Prj000_MazeAndPathFinding.Prj.State
 
                             CreateMapGenerator();
 
-                            Console.SetWindowSize(m_MapSize.X * 4, m_MapSize.Y + 20);
+                            m_NextMapState = GeneratingMapState.GeneratingMap;
 
-                            MapGenerateState = GeneratingMapState.GeneratingMap;
+                            m_bStateChanged = true;
+
                             m_Input = "";
                         }
                     }
@@ -213,7 +231,9 @@ namespace Prj000_MazeAndPathFinding.Prj.State
 
                         if (m_MapGenerator.bGenerateEnded)
                         {
-                            MapGenerateState = GeneratingMapState.WaitEnd;
+                            m_NextMapState = GeneratingMapState.WaitEnd;
+
+                            m_bStateChanged = true;
                         }
                     }
                     break;
@@ -223,104 +243,115 @@ namespace Prj000_MazeAndPathFinding.Prj.State
                     {
                         m_bStateChanged = true;
 
-                        m_Process.SetStateObj(Process.Process.ProcessState.PathFinding); 
+                        m_Process.SetStateObj(Process.Process.ProcessState.PathFinding);
                     }
                     break;
             }
         }
 
-        public override void Render()
+        public override void SetRenderData(Renderer renderer)
         {
-            Console.SetCursorPosition(0, 0);
+            Point pos = new Point(0, 0);
 
             switch (MapGenerateState)
             {
                 case GeneratingMapState.SelectMapType:
-                    Debug.Assert(m_MapGeneratorType != null, "Map Type is null!");
-
-                    int mapGeneratorCount = m_MapGeneratorType.Length - 1;
-                    for (int i = 0; i < mapGeneratorCount; ++i)
                     {
-                        Console.WriteLine($"{i + 1}.\t{m_MapGeneratorType[i]}");
-                    }
+                        Debug.Assert(m_MapGeneratorType != null, "Map Type is null!");
 
-                    Console.WriteLine();
+                        int mapGeneratorCount = m_MapGeneratorType.Length - 1;
+                        for (int i = 0; i < mapGeneratorCount; ++i)
+                        {
+                            renderer.SetMap($"{i + 1}.\t{m_MapGeneratorType[i]}", pos);
+                            pos.Y++;
+                        }
 
-                    Console.Write("Select\t: ");
+                        pos.Y++;
 
-                    if (m_SelectMapType != MapGeneratorType.End)
-                    {
-                        Console.Write($"{m_MapGeneratorType[(int)m_SelectMapType]}");
+                        string temp = "Select\t: ";
+                        renderer.SetMap(temp, pos);
+                        pos.X = temp.Length + 1;
+
+                        if (m_SelectMapType != MapGeneratorType.End)
+                        {
+                            renderer.SetMap($"{m_MapGeneratorType[(int)m_SelectMapType]}", pos);
+                        }
+                        pos.Y++;
                     }
                     break;
 
                 case GeneratingMapState.SelectMapXSize:
-                    Console.WriteLine($"Map Type : {m_SelectMapType}");
-                    Console.Write($"Map Width Size (Odd Number, Upper Limit {UPPER_WIDTH_LIMIT}) : {m_Input}");
+                    {
+                        renderer.SetMap($"Map Type : {m_SelectMapType}", pos);
+
+                        pos.Y++;
+
+                        renderer.SetMap($"Map Width Size (Odd Number, Upper Limit {UPPER_WIDTH_LIMIT}) : {m_Input}", pos);
+                    }
                     break;
 
                 case GeneratingMapState.SelectMapYSize:
-                    Console.WriteLine($"Map Type : {m_SelectMapType}");
-                    Console.WriteLine($"Map Width Size (Odd Number, Upper Limit {UPPER_WIDTH_LIMIT}) : {m_MapSize.X}");
-                    Console.Write($"Map Width Height (Odd Number, Upper Limit {UPPER_HEIGHT_LIMIT}) : {m_Input}");
+                    {
+                        renderer.SetMap($"Map Type : {m_SelectMapType}", pos);
+                        pos.Y++;
+                        renderer.SetMap($"Map Width Size (Odd Number, Upper Limit {UPPER_WIDTH_LIMIT}) : {m_MapSize.X}", pos);
+                        pos.Y++;
+                        renderer.SetMap($"Map Width Height (Odd Number, Upper Limit {UPPER_HEIGHT_LIMIT}) : {m_Input}", pos);
+                    }
                     break;
 
                 case GeneratingMapState.GeneratingMap:
-                    RenderMap();
-
-                    Console.WriteLine();
-
-                    m_Process.MapData.RenderMapInfo();
-
-                    break;
-
                 case GeneratingMapState.WaitEnd:
-                    RenderMap();
+                    {
+                        Debug.Assert(m_MapGenerator != null, "Map Type is null!");
 
-                    Console.WriteLine();
+                        int heightSize = m_MapGenerator.MapData.GetLength(0);
+                        int widthSize = m_MapGenerator.MapData.Length / heightSize;
 
-                    m_Process.MapData.RenderMapInfo();
+                        renderer.SetSize(heightSize, widthSize);
 
+                        for (int i = 0; i < heightSize; ++i)
+                        {
+                            for (int j = 0; j < widthSize; ++j)
+                            {
+                                renderer.SetMap(m_MapGenerator.MapData[i, j], new Point(j, i), m_MapGenerator.MapColor[i, j]);
+                            }
+                        }
+
+                        pos.Y = heightSize + 1;
+                        renderer.SetMap($"Map Type : {m_SelectMapType}", pos);
+                        pos.Y++;
+                        renderer.SetMap($"Map Width Size (Odd Number, Upper Limit {UPPER_WIDTH_LIMIT}) : {m_MapSize.X}", pos);
+                        pos.Y++;
+                        renderer.SetMap($"Map Width Height (Odd Number, Upper Limit {UPPER_HEIGHT_LIMIT}) : {m_MapSize.Y}", pos);
+                        pos.Y++;
+
+                        pos.Y = 0;
+                        pos.X = widthSize + 2;
+
+                        var posInfo = m_MapGenerator.Info["StartPoint"];
+
+                        renderer.SetMap($"{posInfo.MapStr} : {posInfo.MapCharacter}", pos, posInfo.MapColor);
+                        pos.Y++;
+                        posInfo = m_MapGenerator.Info["EndPoint"];
+                        renderer.SetMap($"{posInfo.MapStr} : {posInfo.MapCharacter}", pos, posInfo.MapColor);
+                        pos.Y++;
+                        pos.Y++;
+
+                        renderer.SetMap("Speed Up : ↑", pos, ConsoleColor.Yellow);
+                        pos.Y++;
+                        renderer.SetMap("Speed Down : ↓", pos, ConsoleColor.Yellow);
+                        pos.Y++;
+                        renderer.SetMap(string.Format("Current Speed : {0:F5} Sec", m_MapGenerateSpeed), pos, ConsoleColor.Yellow);
+                    }
                     break;
             }
-
         }
 
         void CreateMapGenerator()
         {
             m_MapGenerator = MapGenerator.MapGeneratorBase.Create(m_Process, (MapGeneratorType)m_SelectMapType, m_MapSize.X, m_MapSize.Y);
             Debug.Assert(m_MapGenerator != null, "Map Generator is not created!");
-        }
-
-        void RenderMap()
-        {
-            Console.ForegroundColor = ConsoleColor.White;
-
-            Debug.Assert(m_MapGenerator != null, "Map Type is null!");
-
-            Console.WriteLine($"Map Type : {m_SelectMapType}");
-            Console.WriteLine($"Map Width Size (Odd Number, Upper Limit {UPPER_WIDTH_LIMIT}) : {m_MapSize.X}");
-            Console.WriteLine($"Map Width Height (Odd Number, Upper Limit {UPPER_HEIGHT_LIMIT}) : {m_MapSize.Y}");
-            Console.WriteLine();
-
-            int widthSize = m_MapGenerator.MapData.GetLength(0);
-            int heightSize = m_MapGenerator.MapData.Length / widthSize;
-
-            for (int i = 0; i < widthSize; ++i)
-            {
-                for (int j = 0; j < heightSize; ++j)
-                {
-                    Console.ForegroundColor = m_MapGenerator.MapColor[i, j];
-                    Console.Write(m_MapGenerator.MapData[i, j]);
-                }
-                Console.WriteLine();
-            }
-
-            Console.WriteLine();
-
-            Console.ForegroundColor = ConsoleColor.White;
-
-            Console.Write("↑ : Speed Up, ↓ : Speed Down, Current Speed : {0:F5} Sec", m_MapGenerateSpeed);
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Prj000_MazeAndPathFinding.Util;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Prj000_MazeAndPathFinding.Prj.State
@@ -67,11 +69,9 @@ namespace Prj000_MazeAndPathFinding.Prj.State
 
                         m_PathFinding = Prj.PathFinding.PathFindingBase.Create(m_Process, m_PathFindingType);
 
-                        Debug.Assert(false, "Path Finding Algorithm is null!");
+                        Debug.Assert(m_PathFinding != null, "Path Finding Algorithm is null!");
 
                         m_CurrentState = State.GeneratePathData;
-
-                        Console.Clear();
                     }
                     break;
 
@@ -99,7 +99,7 @@ namespace Prj000_MazeAndPathFinding.Prj.State
 
                     m_PathFinding.UpdatePath(deltaTime);
 
-                    if (m_CurrentDeltaTime >= m_PathFindingSpeed && !m_PathFinding.IsUpdateEnded())
+                    if (m_CurrentDeltaTime >= m_PathFindingSpeed && m_PathFinding.IsUpdateEnded())
                     {
                         m_CurrentDeltaTime -= m_PathFindingSpeed;
 
@@ -110,17 +110,15 @@ namespace Prj000_MazeAndPathFinding.Prj.State
 
                 case State.SetPathDataToProcess:
                     m_Process.PathData = m_PathFinding.Path;
-                    m_Process.SetStateObj(Process.Process.ProcessState.Run);
+                    //m_Process.SetStateObj(Process.Process.ProcessState.Run);
 
                     break;
             }
         }
 
-        public override void Render()
+        public override void SetRenderData(Renderer renderer)
         {
-            Console.SetCursorPosition(0, 0);
-
-            Console.ForegroundColor = ConsoleColor.White;
+            Point pos = new Point(0, 0);
 
             switch (m_CurrentState)
             {
@@ -130,60 +128,53 @@ namespace Prj000_MazeAndPathFinding.Prj.State
 
                         for (int i = 0; i < pathLength; ++i)
                         {
-                            Console.WriteLine($"{i + 1}. {m_PathFindingNames[i]}");
+                            renderer.SetMap($"{i + 1}. {m_PathFindingNames[i]}", pos);
+                            pos.Y++;
                         }
 
-                        Console.Write("Select Path Finding Algorithm : ");
+
+                        renderer.SetMap("Select Path Finding Algorithm : ", pos);
 
                         if (m_PathFindingType != PathFindingType.End)
                         {
                             Console.Write($"{m_PathFindingNames[(int)m_PathFindingType]}");
                         }
+                        pos.Y++;
                     }
                     break;
 
                 case State.GeneratePathData:
                 case State.SetPathDataToProcess:
                     {
-                        var map = new Util.MapData(MapData);
+                        Debug.Assert(m_PathFinding != null, "Map Type is null!");
 
-                        m_PathFinding.CopyPathToMap(map);
+                        var map = m_Process.MapData;
 
-                        RenderMap(map);
+                        int heightSize = map.Map.GetLength(0);
+                        int widthSize = map.Map.Length / heightSize;
 
-                        map.RenderMapInfo();
+                        for (int i = 0; i < heightSize; ++i)
+                        {
+                            for (int j = 0; j < widthSize; ++j)
+                            {
+                                renderer.SetMap(map.Map[i, j], new Point(j, i), map.Color[i, j]);
+                            }
+                        }
+
+                        pos.X = widthSize + 2;
+                        pos.Y = 0;
+                        renderer.SetMap("Speed Up : ↑", pos, ConsoleColor.Yellow);
+                        pos.Y++;
+                        renderer.SetMap("Speed Down : ↓", pos, ConsoleColor.Yellow);
+                        pos.Y++;
+                        renderer.SetMap(string.Format("Current Speed : {0:F5} Sec : ↑", m_PathFindingSpeed), pos, ConsoleColor.Yellow);
+                        pos.Y++;
+
+                        pos.X = 0;
+                        renderer.SetMap($"Path Finding Algorithm : {m_PathFindingType}", pos);
                     }
                     break;
             }
-        }
-
-        void RenderMap(Util.MapData map)
-        {
-            Console.ForegroundColor = ConsoleColor.White;
-
-            Debug.Assert(m_PathFinding != null, "Map Type is null!");
-
-            Console.WriteLine($"Path Finding Algorithm : {m_PathFindingType}");
-            Console.WriteLine();
-
-            int widthSize = map.Map.GetLength(0);
-            int heightSize = map.Map.Length / widthSize;
-
-            for (int i = 0; i < widthSize; ++i)
-            {
-                for (int j = 0; j < heightSize; ++j)
-                {
-                    Console.ForegroundColor = map.Color[i, j];
-                    Console.Write(map.Map[i, j]);
-                }
-                Console.WriteLine();
-            }
-
-            Console.WriteLine();
-
-            Console.ForegroundColor = ConsoleColor.White;
-
-            Console.Write("↑ : Speed Up, ↓ : Speed Down, Current Speed : {0:F5} Sec", m_PathFindingSpeed);
         }
     }
 }

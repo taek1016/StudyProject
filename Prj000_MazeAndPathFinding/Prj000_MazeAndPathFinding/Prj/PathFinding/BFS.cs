@@ -25,9 +25,10 @@ namespace Prj000_MazeAndPathFinding.Prj.PathFinding
 
         public override void UpdatePath(double deltaTime)
         {
+
         }
 
-        public override void CopyPathToMap(MapData mapData)
+        protected override void InitData(MapData mapData)
         {
             throw new NotImplementedException();
         }

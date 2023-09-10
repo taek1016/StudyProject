@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Prj000_MazeAndPathFinding.Prj.Util;
+using Prj000_MazeAndPathFinding.Util;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -7,6 +9,12 @@ using System.Threading.Tasks;
 
 namespace Prj000_MazeAndPathFinding.Prj.PathFinding
 {
+    public struct PathData
+    {
+        Point Point;
+        ConsoleColor color;
+
+    }
     public abstract class PathFindingBase
     {
         public static PathFindingBase Create(Process.Process process, State.PathFinding.PathFindingType pathFindingType)
@@ -20,6 +28,7 @@ namespace Prj000_MazeAndPathFinding.Prj.PathFinding
                     break;
 
                 case State.PathFinding.PathFindingType.DFS:
+                    obj = new DFS();
                     break;
 
                 case State.PathFinding.PathFindingType.Dijikstra:
@@ -33,16 +42,19 @@ namespace Prj000_MazeAndPathFinding.Prj.PathFinding
                     break;
             }
 
+            obj.InitData(process.MapData);
+
             return obj;
         }
 
         protected Util.PathData m_OptimizedPathData = null;
         public Util.PathData Path { get => m_OptimizedPathData; protected set { m_OptimizedPathData = value; } }
 
+        protected abstract void InitData(MapData mapData);
+
         public abstract void UpdatePath(double deltaTime);
 
         public abstract bool IsUpdateEnded();
 
-        public abstract void CopyPathToMap(Util.MapData mapData);
     }
 }

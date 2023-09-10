@@ -20,23 +20,6 @@ namespace Prj000_MazeAndPathFinding.Prj
 
         public void Run()
         {
-            Console.Write("Press any key to start : ");
-
-            while (true)
-            {
-                if (Console.KeyAvailable)
-                {
-                    var readKey = Console.ReadKey(true);
-
-                    if (readKey.Key != 0)
-                    {
-                        break;
-                    }
-                }
-            }
-
-            Console.Clear();
-
             m_Time.StartDeltaTime();
 
             while (true)
@@ -48,7 +31,6 @@ namespace Prj000_MazeAndPathFinding.Prj
                     m_Process.Run(deltaTime);
                 }
             }
-
         }
     }
 }

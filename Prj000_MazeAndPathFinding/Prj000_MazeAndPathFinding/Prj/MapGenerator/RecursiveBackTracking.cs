@@ -59,7 +59,7 @@ namespace Prj000_MazeAndPathFinding.Prj.MapGenerator
                         int xPos = m_Random.Next() % m_MapData.WidthSize;
                         int yPos = m_Random.Next() % m_MapData.HeightSize;
 
-                        if (m_MapData.Visited[xPos, yPos] == false)
+                        if (m_MapData.Visited[yPos, xPos] == false)
                         {
                             m_CurrentPosition.X = xPos;
                             m_CurrentPosition.Y = yPos;
@@ -76,7 +76,7 @@ namespace Prj000_MazeAndPathFinding.Prj.MapGenerator
                         int xPos = m_Random.Next() % m_MapData.WidthSize;
                         int yPos = m_Random.Next() % m_MapData.HeightSize;
 
-                        if (m_MapData.Visited[xPos, yPos] == false)
+                        if (m_MapData.Visited[yPos, xPos] == false)
                         {
                             Point endPos = new Point(xPos, yPos);
 
@@ -104,15 +104,15 @@ namespace Prj000_MazeAndPathFinding.Prj.MapGenerator
 
                             Point pos = m_CurrentPosition + m_WayData[randomWay];
 
-                            int rowLength = m_MapData.Map.GetLength(0);
-                            int heightLength = m_MapData.Map.Length / rowLength;
+                            int heightLength = m_MapData.Map.GetLength(0);
+                            int rowLength = m_MapData.Map.Length / heightLength;
 
                             if (0 >= pos.X || pos.X >= rowLength || 0 >= pos.Y || pos.Y >= heightLength)
                             {
                                 continue;
                             }
 
-                            if (m_MapData.Visited[pos.X, pos.Y] == false)
+                            if (m_MapData.Visited[pos.Y, pos.X] == false)
                             {
                                 m_PositionStack.Push(m_CurrentPosition.Copy());
 
@@ -227,8 +227,8 @@ namespace Prj000_MazeAndPathFinding.Prj.MapGenerator
             int END_COUNT = (int)FindWay.End;
             bool[] bVisited = new bool[END_COUNT];
 
-            int rowLength = m_MapData.Map.GetLength(0);
-            int heightLength = m_MapData.Map.Length / rowLength;
+            int heightLength = m_MapData.Map.GetLength(0);
+            int rowLength = m_MapData.Map.Length / heightLength;
 
             for (int i = 0; i < END_COUNT; ++i)
             {

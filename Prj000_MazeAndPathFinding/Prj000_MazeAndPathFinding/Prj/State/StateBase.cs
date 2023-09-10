@@ -44,6 +44,6 @@ namespace Prj000_MazeAndPathFinding.Prj.State
 
         public abstract void Update(double deltaTime);
 
-        public abstract void Render();
+        public abstract void SetRenderData(Renderer renderer);
     }
 }

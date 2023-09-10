@@ -66,6 +66,8 @@ namespace Prj000_MazeAndPathFinding.Prj.MapGenerator
 
         protected MapData m_MapData = null;
 
+        public MapData Info { get => m_MapData; }
+
         public char[,] MapData { get => m_MapData.Map; }
         public bool[,] Visited { get => m_MapData.Visited; }
         public ConsoleColor[,] MapColor { get => m_MapData.Color; }
@@ -84,22 +86,22 @@ namespace Prj000_MazeAndPathFinding.Prj.MapGenerator
             int xPos = pos.X;
             int yPos = pos.Y;
 
-            m_MapData.Map[xPos, yPos] = info.MapCharacter;
+            m_MapData.Map[yPos, xPos] = info.MapCharacter;
 
             if (m_MapData.StartPoint.Equals(pos))
             {
-                m_MapData.Color[xPos, yPos] = m_MapData["StartPoint"].MapColor;
+                m_MapData.Color[yPos, xPos] = m_MapData["StartPoint"].MapColor;
             }
             else if (m_MapData.EndPoint.Equals(pos))
             {
-                m_MapData.Color[xPos, yPos] = m_MapData["EndPoint"].MapColor;
+                m_MapData.Color[yPos, xPos] = m_MapData["EndPoint"].MapColor;
             }
             else
             {
-                m_MapData.Color[xPos, yPos] = info.MapColor;
+                m_MapData.Color[yPos, xPos] = info.MapColor;
             }
 
-            m_MapData.Visited[xPos, yPos] = true;
+            m_MapData.Visited[yPos, xPos] = true;
         }
 
         protected void EndMapGenerate()

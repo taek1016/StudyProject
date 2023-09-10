@@ -46,7 +46,9 @@
   <ItemGroup>
     <Compile Include="Prj\Entrance.cs" />
     <Compile Include="Prj\PathFinding\BFS.cs" />
+    <Compile Include="Prj\PathFinding\DFS.cs" />
     <Compile Include="Prj\PathFinding\PathFindingBase.cs" />
+    <Compile Include="Prj\Renderer.cs" />
     <Compile Include="Prj\State\PathFinding.cs" />
     <Compile Include="Util\MapData.cs" />
     <Compile Include="Prj\MapGenerator\MapGeneratorBase.cs" />

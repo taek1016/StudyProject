@@ -29,7 +29,7 @@ namespace Prj000_MazeAndPathFinding.Prj.Util
     }
 
     #region MapInfo
-    internal class MapInfo
+    public class MapInfo
     {
         internal MapInfo()
         {
@@ -54,31 +54,6 @@ namespace Prj000_MazeAndPathFinding.Prj.Util
         public void Add(string key, char mapCharacter, ConsoleColor color)
         {
             m_MapInfo.Add(key, new SingleMapInfo(key, mapCharacter, color));
-        }
-
-        public void Render()
-        {
-            int count = m_MapInfo.Count;
-            int curIndex = 0;
-            foreach (var item in m_MapInfo)
-            {
-                SingleMapInfo info = item.Value;
-                Console.ForegroundColor = ConsoleColor.White;
-
-                Console.Write($"{info.MapStr} : ");
-
-                Console.ForegroundColor = info.MapColor;
-
-                Console.Write(info.MapCharacter);
-
-                if (curIndex != count - 1)
-                {
-                    Console.ForegroundColor = ConsoleColor.White;
-                    Console.Write(", ");
-                }
-
-                curIndex++;
-            }
         }
         
         public SingleMapInfo this[string key]
@@ -105,7 +80,7 @@ namespace Prj000_MazeAndPathFinding.Prj.Util
         {
             m_Info = new MapInfo(other.m_Info);
 
-            CreateMap(m_WidthSize, m_HeightSize);
+            CreateMap(other.m_WidthSize, other.m_HeightSize);
 
             for (int i = 0; i < m_WidthSize; ++i)
             {
@@ -122,6 +97,8 @@ namespace Prj000_MazeAndPathFinding.Prj.Util
         }
 
         private MapInfo m_Info = null;
+
+        public MapInfo Info { get => m_Info; }
 
         int m_WidthSize = -1;
         public int WidthSize { get => m_WidthSize; }
@@ -155,9 +132,9 @@ namespace Prj000_MazeAndPathFinding.Prj.Util
             m_WidthSize = widthSize;
             m_HeightSize = heightSize;
 
-            m_MapData = new char[m_WidthSize, m_HeightSize];
-            m_Color = new ConsoleColor[m_WidthSize, m_HeightSize];
-            m_Visited = new bool[m_WidthSize, m_HeightSize];
+            m_MapData = new char[m_HeightSize, m_WidthSize];
+            m_Color = new ConsoleColor[m_HeightSize, m_WidthSize];
+            m_Visited = new bool[m_HeightSize, m_WidthSize];
 
             var wallInfo = m_Info["Wall"];
             Debug.Assert(wallInfo != null, "Wall is not defined");
@@ -168,9 +145,9 @@ namespace Prj000_MazeAndPathFinding.Prj.Util
             Debug.Assert(m_Info["StartPoint"] != null, "StartPoint is not defined");
             Debug.Assert(m_Info["EndPoint"] != null, "EndPoint is not defined");
 
-            for (int i = 0; i < widthSize; ++i)
+            for (int i = 0; i < heightSize; ++i)
             {
-                for (int j = 0; j < heightSize; ++j)
+                for (int j = 0; j < widthSize; ++j)
                 {
                     if (i == 0 || j == 0 || i == widthSize - 1 || j == heightSize - 1)
                     {
@@ -202,14 +179,14 @@ namespace Prj000_MazeAndPathFinding.Prj.Util
             }
         }
 
-        public void RenderMapInfo()
-        {
-            m_Info.Render();
-        }
-
         public void AddMapInfo(string key, char mapCharacter, ConsoleColor color)
         {
             m_Info.Add(key, mapCharacter, color);
+        }
+
+        public char GetWallInfo() 
+        { 
+            return m_Info["Wall"].MapCharacter; 
         }
     }
 }
