@@ -153,6 +153,8 @@ namespace Prj000_MazeAndPathFinding.Prj.State
                         int heightSize = map.Map.GetLength(0);
                         int widthSize = map.Map.Length / heightSize;
 
+                        renderer.SetSize(heightSize, widthSize);
+
                         for (int i = 0; i < heightSize; ++i)
                         {
                             for (int j = 0; j < widthSize; ++j)
@@ -161,8 +163,35 @@ namespace Prj000_MazeAndPathFinding.Prj.State
                             }
                         }
 
+                        var startPos = map.StartPoint;
+                        var endPos = map.EndPoint;
+                        var pathSearched = m_PathFinding.Searched;
+                        var pathArr = pathSearched.ToArray();
+
+                        int pathCount = pathArr.Length;
+
+                        for (int i = pathCount - 1; i >= 0; --i)
+                        {
+                            if (pathArr[i].Equals(startPos) || pathArr[i].Equals(endPos))
+                            {
+                                continue;
+                            }
+
+                            renderer.SetMap('□', pathArr[i], ConsoleColor.Magenta);
+                        }
+
                         pos.X = widthSize + 2;
                         pos.Y = 0;
+
+                        var posInfo = map.Info["StartPoint"];
+                        renderer.SetMap($"{posInfo.MapStr} : {posInfo.MapCharacter}", pos, posInfo.MapColor);
+                        pos.Y++;
+
+                        posInfo = map.Info["EndPoint"];
+                        renderer.SetMap($"{posInfo.MapStr} : {posInfo.MapCharacter}", pos, posInfo.MapColor);
+                        pos.Y++;
+                        pos.Y++;
+
                         renderer.SetMap("Speed Up : ↑", pos, ConsoleColor.Yellow);
                         pos.Y++;
                         renderer.SetMap("Speed Down : ↓", pos, ConsoleColor.Yellow);
@@ -171,6 +200,7 @@ namespace Prj000_MazeAndPathFinding.Prj.State
                         pos.Y++;
 
                         pos.X = 0;
+                        pos.Y = heightSize + 1;
                         renderer.SetMap($"Path Finding Algorithm : {m_PathFindingType}", pos);
                     }
                     break;

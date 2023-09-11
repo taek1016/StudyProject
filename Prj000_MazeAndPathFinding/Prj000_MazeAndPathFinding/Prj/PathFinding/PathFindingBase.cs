@@ -50,6 +50,9 @@ namespace Prj000_MazeAndPathFinding.Prj.PathFinding
         protected Util.PathData m_OptimizedPathData = null;
         public Util.PathData Path { get => m_OptimizedPathData; protected set { m_OptimizedPathData = value; } }
 
+        protected Stack<Point> m_MapSearched = new Stack<Point>();
+        public Stack<Point> Searched { get => m_MapSearched; }
+
         protected abstract void InitData(MapData mapData);
 
         public abstract void UpdatePath(double deltaTime);
