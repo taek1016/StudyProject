@@ -44,6 +44,8 @@ namespace Prj000_MazeAndPathFinding.Prj.State
         double m_CurrentDeltaTime = 0;
         double m_PathFindingSpeed = 0.3;
 
+        int m_StackIndex = 0;
+
         public override void Update(double deltaTime)
         {
             switch (m_CurrentState)
@@ -91,6 +93,16 @@ namespace Prj000_MazeAndPathFinding.Prj.State
                             case ConsoleKey.DownArrow:
                                 m_PathFindingSpeed += m_PathFindingSpeed * 0.1;
                                 break;
+
+                            case ConsoleKey.RightArrow:
+                                m_StackIndex++;
+                                m_StackIndex %= m_PathFinding.Searched.Count;
+                                break;
+
+                            case ConsoleKey.LeftArrow:
+                                m_StackIndex--;
+                                m_StackIndex %= m_PathFinding.Searched.Count;
+                                break;
                         }
                     }
                     Debug.Assert(m_PathFinding != null, "Map Generator is null!");
@@ -98,6 +110,11 @@ namespace Prj000_MazeAndPathFinding.Prj.State
                     m_CurrentDeltaTime += deltaTime;
 
                     m_PathFinding.UpdatePath(deltaTime);
+
+                    if (m_StackIndex < 0 && m_PathFinding.Searched.Count > 0)
+                    {
+                        m_StackIndex = 0;
+                    }
 
                     if (m_CurrentDeltaTime >= m_PathFindingSpeed && m_PathFinding.IsUpdateEnded())
                     {
@@ -163,41 +180,57 @@ namespace Prj000_MazeAndPathFinding.Prj.State
                             }
                         }
 
-                        var startPos = map.StartPoint;
-                        var endPos = map.EndPoint;
-                        var pathSearched = m_PathFinding.Searched;
-                        var pathArr = pathSearched.ToArray();
-
-                        int pathCount = pathArr.Length;
-
-                        for (int i = pathCount - 1; i >= 0; --i)
+                        if (0 <= m_StackIndex && m_StackIndex < m_PathFinding.Searched.Count)
                         {
-                            if (pathArr[i].Equals(startPos) || pathArr[i].Equals(endPos))
-                            {
-                                continue;
-                            }
+                            var startPos = map.StartPoint;
+                            var endPos = map.EndPoint;
+                            var pathSearched = m_PathFinding.Searched[m_StackIndex];
+                            var pathArr = pathSearched.ToArray();
 
-                            renderer.SetMap('□', pathArr[i], ConsoleColor.Magenta);
+                            int pathCount = pathArr.Length;
+
+                            for (int i = pathCount - 1; i >= 0; --i)
+                            {
+                                if (pathArr[i].Equals(startPos) || pathArr[i].Equals(endPos))
+                                {
+                                    continue;
+                                }
+
+                                renderer.SetMap('□', pathArr[i], ConsoleColor.Magenta);
+                            }
                         }
 
                         pos.X = widthSize + 2;
                         pos.Y = 0;
 
                         var posInfo = map.Info["StartPoint"];
-                        renderer.SetMap($"{posInfo.MapStr} : {posInfo.MapCharacter}", pos, posInfo.MapColor);
+                        renderer.SetMap($"{posInfo.MapCharacter} : {posInfo.MapStr}", pos, posInfo.MapColor);
                         pos.Y++;
 
                         posInfo = map.Info["EndPoint"];
-                        renderer.SetMap($"{posInfo.MapStr} : {posInfo.MapCharacter}", pos, posInfo.MapColor);
+                        renderer.SetMap($"{posInfo.MapCharacter} : {posInfo.MapStr}", pos, posInfo.MapColor);
+                        pos.Y++;
+                        renderer.SetMap($"□ : Path Finding", pos, ConsoleColor.Magenta);
                         pos.Y++;
                         pos.Y++;
 
-                        renderer.SetMap("Speed Up : ↑", pos, ConsoleColor.Yellow);
+                        renderer.SetMap("↑ : Speed Up", pos, ConsoleColor.Yellow);
                         pos.Y++;
-                        renderer.SetMap("Speed Down : ↓", pos, ConsoleColor.Yellow);
+                        renderer.SetMap("↓ : Speed Down", pos, ConsoleColor.Yellow);
                         pos.Y++;
-                        renderer.SetMap(string.Format("Current Speed : {0:F5} Sec : ↑", m_PathFindingSpeed), pos, ConsoleColor.Yellow);
+                        renderer.SetMap(string.Format("{0:F5} Sec : Current Speed", m_PathFindingSpeed), pos, ConsoleColor.Yellow);
                         pos.Y++;
+                        pos.Y++;
+
+                        if (m_PathFinding.Searched.Count > 0)
+                        {
+                            renderer.SetMap("→ : Next Path", pos, ConsoleColor.Yellow);
+                            pos.Y++;
+                            renderer.SetMap("← : Before Path", pos, ConsoleColor.Yellow);
+                            pos.Y++;
+                            renderer.SetMap($"{m_StackIndex} / {m_PathFinding.Searched.Count.ToString("000")} : Current Path Index / Path Count", pos, ConsoleColor.Yellow);
+                            pos.Y++;
+                        }
 
                         pos.X = 0;
                         pos.Y = heightSize + 1;

@@ -21,7 +21,7 @@ namespace Prj000_MazeAndPathFinding.Prj.PathFinding
         }
         internal DFS() : base()
         {
-
+            m_MapSearched.Add(new Stack<Point>());
         }
 
 
@@ -49,7 +49,7 @@ namespace Prj000_MazeAndPathFinding.Prj.PathFinding
 
             bool bFullSearched = true;
 
-            if (m_MapSearched.Count > 0 && m_MapSearched.Peek().Equals(m_MapPointer.EndPoint))
+            if (m_MapSearched[0].Count > 0 && m_MapSearched[0].Peek().Equals(m_MapPointer.EndPoint))
             {
                 m_bEnded = true;
                 return;
@@ -69,8 +69,8 @@ namespace Prj000_MazeAndPathFinding.Prj.PathFinding
             if (bFullSearched)
             {
                 m_VisitQueue.Dequeue();
-                var pos = m_MapSearched.Pop();
-                m_VisitQueue.Enqueue(m_MapSearched.Peek());
+                var pos = m_MapSearched[0].Pop();
+                m_VisitQueue.Enqueue(m_MapSearched[0].Peek());
                 return;
             }
 
@@ -85,7 +85,7 @@ namespace Prj000_MazeAndPathFinding.Prj.PathFinding
                     m_VisitQueue.Dequeue();
                     m_VisitQueue.Enqueue(nextPos);
                     m_MapVisited[nextPos.Y, nextPos.X] = true;
-                    m_MapSearched.Push(nextPos);
+                    m_MapSearched[0].Push(nextPos);
                     break;
                 }
             }
@@ -118,7 +118,7 @@ namespace Prj000_MazeAndPathFinding.Prj.PathFinding
             #region QueueSet
             Point startPos = mapData.StartPoint;
             m_VisitQueue.Enqueue(startPos);
-            m_MapSearched.Push(startPos);
+            m_MapSearched[0].Push(startPos);
 
             m_MapVisited[startPos.Y, startPos.X] = true;
             #endregion

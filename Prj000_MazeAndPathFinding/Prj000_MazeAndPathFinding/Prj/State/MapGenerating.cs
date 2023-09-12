@@ -331,18 +331,18 @@ namespace Prj000_MazeAndPathFinding.Prj.State
 
                         var posInfo = m_MapGenerator.Info["StartPoint"];
 
-                        renderer.SetMap($"{posInfo.MapStr} : {posInfo.MapCharacter}", pos, posInfo.MapColor);
+                        renderer.SetMap($"{posInfo.MapCharacter} : {posInfo.MapStr}", pos, posInfo.MapColor);
                         pos.Y++;
                         posInfo = m_MapGenerator.Info["EndPoint"];
-                        renderer.SetMap($"{posInfo.MapStr} : {posInfo.MapCharacter}", pos, posInfo.MapColor);
+                        renderer.SetMap($"{posInfo.MapCharacter} : {posInfo.MapStr}", pos, posInfo.MapColor);
                         pos.Y++;
                         pos.Y++;
 
-                        renderer.SetMap("Speed Up : ↑", pos, ConsoleColor.Yellow);
+                        renderer.SetMap("↑ : Speed Up", pos, ConsoleColor.Yellow);
                         pos.Y++;
-                        renderer.SetMap("Speed Down : ↓", pos, ConsoleColor.Yellow);
+                        renderer.SetMap("↓ : Speed Down", pos, ConsoleColor.Yellow);
                         pos.Y++;
-                        renderer.SetMap(string.Format("Current Speed : {0:F5} Sec", m_MapGenerateSpeed), pos, ConsoleColor.Yellow);
+                        renderer.SetMap(string.Format("{0:F5} Sec : Current Speed", m_MapGenerateSpeed), pos, ConsoleColor.Yellow);
                     }
                     break;
             }
